@@ -4,11 +4,31 @@
 }
 
 .card {
-    background: white;
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
     padding: 40px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
     animation: slideUp 0.5s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.5), 
+        transparent
+    );
 }
 
 @keyframes slideUp {
@@ -23,23 +43,28 @@
 }
 
 h1 {
-    color: #333;
+    color: rgba(255, 255, 255, 0.95);
     font-size: 2.5em;
     margin-bottom: 10px;
     text-align: center;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    font-weight: 700;
 }
 
 .subtitle {
-    color: #666;
+    color: rgba(255, 255, 255, 0.8);
     text-align: center;
     margin-bottom: 40px;
     font-size: 1.1em;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
-    color: #333;
+    color: rgba(255, 255, 255, 0.95);
     font-size: 1.3em;
     margin-bottom: 20px;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
 }
 
 .noise-selection {
@@ -57,21 +82,30 @@ h2 {
     align-items: center;
     cursor: pointer;
     padding: 15px;
-    border-radius: 12px;
+    border-radius: 16px;
     transition: all 0.3s ease;
-    border: 2px solid #e0e0e0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .checkbox-label:hover {
-    background-color: #f5f5f5;
-    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
     transform: translateX(5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .checkbox-label.checked {
-    border-color: #667eea;
-    background-color: #f0f0ff;
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .checkbox-label input[type="radio"] {
@@ -81,29 +115,36 @@ h2 {
 }
 
 .checkbox-label input[type="radio"]:checked ~ .checkbox-custom {
-    background-color: #667eea;
-    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5),
+                inset 0 0 10px rgba(102, 126, 234, 0.3);
 }
 
 .checkbox-label input[type="radio"]:checked ~ .checkbox-custom::after {
     opacity: 1;
     transform: scale(1);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .checkbox-label input[type="radio"]:checked ~ .checkbox-text {
-    color: #667eea;
+    color: rgba(255, 255, 255, 0.95);
     font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .checkbox-custom {
     width: 24px;
     height: 24px;
-    border: 2px solid #ccc;
+    border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
     margin-right: 15px;
     position: relative;
     transition: all 0.3s ease;
     flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
 .checkbox-custom::after {
@@ -122,8 +163,9 @@ h2 {
 
 .checkbox-text {
     font-size: 1.1em;
-    color: #333;
+    color: rgba(255, 255, 255, 0.9);
     transition: all 0.3s ease;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .duration-selection {
@@ -142,12 +184,17 @@ h2 {
 .duration-slider {
     width: 100%;
     height: 10px;
-    border-radius: 5px;
+    border-radius: 10px;
     outline: none;
     -webkit-appearance: none;
     appearance: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .duration-slider::-webkit-slider-thumb {
@@ -156,17 +203,23 @@ h2 {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     cursor: pointer;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
-    border: 3px solid #667eea;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2),
+                0 0 20px rgba(255, 255, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.6);
     transition: all 0.3s ease;
     position: relative;
 }
 
 .duration-slider::-webkit-slider-thumb:hover {
     transform: scale(1.15);
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 6px 25px rgba(255, 255, 255, 0.5),
+                0 0 30px rgba(102, 126, 234, 0.6);
+    background: rgba(255, 255, 255, 1);
 }
 
 .duration-slider::-webkit-slider-thumb:active {
@@ -177,16 +230,22 @@ h2 {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     cursor: pointer;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
-    border: 3px solid #667eea;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2),
+                0 0 20px rgba(255, 255, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.6);
     transition: all 0.3s ease;
 }
 
 .duration-slider::-moz-range-thumb:hover {
     transform: scale(1.15);
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 6px 25px rgba(255, 255, 255, 0.5),
+                0 0 30px rgba(102, 126, 234, 0.6);
+    background: rgba(255, 255, 255, 1);
 }
 
 .duration-slider::-moz-range-thumb:active {
@@ -198,20 +257,19 @@ h2 {
     justify-content: space-between;
     align-items: center;
     font-size: 0.85em;
-    color: #666;
+    color: rgba(255, 255, 255, 0.8);
     margin-bottom: 15px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .duration-value {
     font-size: 1.4em;
     font-weight: 700;
-    color: #667eea;
+    color: rgba(255, 255, 255, 0.95);
     text-align: center;
     min-width: 120px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.5),
+                 0 0 20px rgba(102, 126, 234, 0.5);
 }
 
 .slider-presets {
@@ -224,23 +282,28 @@ h2 {
 
 .preset-btn {
     padding: 8px 16px;
-    background: #f5f5f5;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
     font-size: 0.9em;
     font-weight: 500;
-    color: #666;
+    color: rgba(255, 255, 255, 0.9);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     font-family: inherit;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .preset-btn:hover:not(:disabled) {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .preset-btn:active:not(:disabled) {
@@ -248,33 +311,61 @@ h2 {
 }
 
 .preset-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .generate-btn {
     width: 100%;
     padding: 18px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
     font-size: 1.2em;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                0 0 30px rgba(102, 126, 234, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.generate-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent
+    );
+    transition: left 0.5s;
+}
+
+.generate-btn:hover:not(:disabled)::before {
+    left: 100%;
 }
 
 .generate-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                0 0 40px rgba(102, 126, 234, 0.5);
 }
 
 .generate-btn:active:not(:disabled) {
@@ -282,9 +373,10 @@ h2 {
 }
 
 .generate-btn:disabled {
-    opacity: 0.7;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .btn-loader {
@@ -307,10 +399,14 @@ h2 {
 .status-message {
     margin-top: 20px;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 16px;
     text-align: center;
     font-size: 1em;
     display: none;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .status-message.show {
@@ -319,21 +415,24 @@ h2 {
 }
 
 .status-message.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background: rgba(212, 237, 218, 0.3);
+    color: rgba(21, 87, 36, 0.95);
+    border: 1px solid rgba(195, 230, 203, 0.5);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .status-message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background: rgba(248, 215, 218, 0.3);
+    color: rgba(114, 28, 36, 0.95);
+    border: 1px solid rgba(245, 198, 203, 0.5);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .status-message.info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
+    background: rgba(209, 236, 241, 0.3);
+    color: rgba(12, 84, 96, 0.95);
+    border: 1px solid rgba(190, 229, 235, 0.5);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 @keyframes fadeIn {

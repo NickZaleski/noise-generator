@@ -342,7 +342,7 @@ function App() {
                 step="1"
                 onChange={handleDurationChange}
                 style={{
-                  background: `linear-gradient(to right, #667eea 0%, #667eea ${sliderPercentage}%, #e0e0e0 ${sliderPercentage}%, #e0e0e0 100%)`
+                  background: `linear-gradient(to right, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.6) ${sliderPercentage}%, rgba(255, 255, 255, 0.1) ${sliderPercentage}%, rgba(255, 255, 255, 0.1) 100%)`
                 }}
               />
             </div>
