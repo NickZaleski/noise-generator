@@ -2,6 +2,11 @@
 
 A React web application for generating high-quality noise audio files (Brown, White, Pink, and Blue noise) in WAV format.
 
+**Noise Generator is a project by Nick Zaleski — Product Manager, Musician, Entrepreneur**
+
+- **Current company:** Alconost Inc.
+- **Music projects:** beside the point, nick zaleski, dempo, carapils
+
 ## Features
 
 - 🎵 Four noise types: Brown, White, Pink, and Blue noise

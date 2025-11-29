@@ -1,6 +1,13 @@
 {
   "name": "noise-generator",
   "version": "1.0.0",
+  "description": "Noise Generator is a project by Nick Zaleski — Product Manager, Musician, Entrepreneur",
+  "author": {
+    "name": "Nick Zaleski",
+    "title": "Product Manager, Musician, Entrepreneur",
+    "company": "Alconost Inc.",
+    "music": "beside the point, nick zaleski, dempo, carapils"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

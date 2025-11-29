@@ -6,9 +6,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
+    background: #000000;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -25,31 +23,50 @@ body::before {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: float 20s linear infinite;
+    background: 
+        radial-gradient(ellipse at 20% 50%, rgba(0, 0, 0, 0.3) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 0, 0, 0.25) 0%, transparent 60%);
+    filter: blur(40px);
+    animation: liquidMove1 30s ease-in-out infinite;
     pointer-events: none;
     z-index: 0;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
-@keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
+body::after {
+    content: '';
+    position: fixed;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(ellipse at 60% 30%, rgba(0, 0, 0, 0.25) 0%, transparent 60%),
+        radial-gradient(ellipse at 30% 70%, rgba(0, 0, 0, 0.2) 0%, transparent 55%);
+    filter: blur(50px);
+    animation: liquidMove2 35s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+@keyframes liquidMove1 {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
     }
     50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
+        transform: translate(5%, -5%) scale(1.1);
     }
 }
 
-@keyframes float {
-    0% {
-        transform: translate(0, 0);
+@keyframes liquidMove2 {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
     }
-    100% {
-        transform: translate(50px, 50px);
+    50% {
+        transform: translate(-5%, 5%) scale(1.1);
     }
 }
 

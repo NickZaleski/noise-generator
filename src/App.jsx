@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import './App.css'
 
 const SAMPLE_RATE = 44100; // CD quality
@@ -31,9 +31,20 @@ function App() {
   const [duration, setDuration] = useState(DEFAULT_DURATION_MINUTES)
   const [isGenerating, setIsGenerating] = useState(false)
   const [status, setStatus] = useState({ message: '', type: '' })
+  const sliderSoundTimeoutRef = useRef(null)
+  const lastPlayedValueRef = useRef(null)
+  const audioContextRef = useRef(null)
 
-  const handleDurationChange = useCallback((e) => {
-    setDuration(parseFloat(e.target.value))
+  // Get or create a shared AudioContext
+  const getAudioContext = useCallback(() => {
+    if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)()
+    }
+    // Resume if suspended (browsers suspend AudioContext until user interaction)
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume()
+    }
+    return audioContextRef.current
   }, [])
 
   const showStatus = useCallback((message, type) => {
@@ -44,6 +55,108 @@ function App() {
       }, 5000)
     }
   }, [])
+
+  // Sound effects using Web Audio API
+  const playHoverSound = useCallback(() => {
+    try {
+      const audioContext = getAudioContext()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      
+      oscillator.frequency.value = 400
+      oscillator.type = 'sine'
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
+      
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.1)
+    } catch (error) {
+      // Silently fail if audio context is not available
+    }
+  }, [getAudioContext])
+
+  const playSelectSound = useCallback(() => {
+    try {
+      const audioContext = getAudioContext()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      
+      // Two-tone sound for selection
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime)
+      oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.05)
+      oscillator.type = 'sine'
+      
+      gainNode.gain.setValueAtTime(0.15, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15)
+      
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.15)
+    } catch (error) {
+      // Silently fail if audio context is not available
+    }
+  }, [getAudioContext])
+
+  // Slider sound effect - pitch changes based on position
+  const playSliderSound = useCallback((value) => {
+    // Don't play if we've already played for this exact value
+    if (lastPlayedValueRef.current === value) {
+      return
+    }
+    
+    // Clear any pending timeout
+    if (sliderSoundTimeoutRef.current) {
+      clearTimeout(sliderSoundTimeoutRef.current)
+    }
+    
+    // Mark this value as played immediately to prevent duplicate plays
+    lastPlayedValueRef.current = value
+    
+    // Use a very short delay to ensure the sound plays even with rapid movements
+    sliderSoundTimeoutRef.current = setTimeout(() => {
+      try {
+        const audioContext = getAudioContext()
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+        
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+        
+        // Calculate frequency based on slider position (300Hz to 800Hz)
+        const minFreq = 300
+        const maxFreq = 800
+        const normalizedValue = (value - MIN_DURATION_MINUTES) / (MAX_DURATION_MINUTES - MIN_DURATION_MINUTES)
+        const frequency = minFreq + (maxFreq - minFreq) * normalizedValue
+        
+        oscillator.frequency.value = frequency
+        oscillator.type = 'sine'
+        
+        // Short, satisfying sound with quick fade
+        gainNode.gain.setValueAtTime(0.12, audioContext.currentTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.08)
+        
+        oscillator.start(audioContext.currentTime)
+        oscillator.stop(audioContext.currentTime + 0.08)
+      } catch (error) {
+        // Silently fail if audio context is not available
+      }
+    }, 10) // Reduced delay to ensure sounds play
+  }, [getAudioContext])
+
+  const handleDurationChange = useCallback((e) => {
+    const newValue = parseFloat(e.target.value)
+    setDuration(newValue)
+    // Only play sound for values that are multiples of 5 minutes
+    if (newValue % 5 === 0) {
+      playSliderSound(newValue)
+    }
+  }, [playSliderSound])
 
   // White Noise: Equal energy per frequency (flat spectrum)
   const generateWhiteNoise = useCallback((length) => {
@@ -113,6 +226,73 @@ function App() {
     }
     
     return { samples, state: { lastSample } }
+  }, [])
+
+  // Violet Noise: High-frequency emphasis (f² spectrum)
+  const generateVioletNoise = useCallback((length, state = null) => {
+    const samples = new Float32Array(length)
+    let lastSample = state?.lastSample ?? 0
+    let lastLastSample = state?.lastLastSample ?? 0
+    
+    for (let i = 0; i < length; i++) {
+      const white = (Math.random() * 2 - 1) * 0.5
+      // Double differentiation of white noise creates violet noise
+      samples[i] = (white - 2 * lastSample + lastLastSample) * 0.3
+      lastLastSample = lastSample
+      lastSample = white
+    }
+    
+    return { samples, state: { lastSample, lastLastSample } }
+  }, [])
+
+  // Grey Noise: Psychoacoustically equal loudness across frequencies
+  const generateGreyNoise = useCallback((length) => {
+    const samples = new Float32Array(length)
+    
+    // Grey noise uses frequency-dependent filtering to achieve equal perceived loudness
+    // This is a simplified approximation using multiple filtered noise bands
+    for (let i = 0; i < length; i++) {
+      const white = (Math.random() * 2 - 1) * 0.5
+      
+      // Apply psychoacoustic weighting (simplified A-weighting approximation)
+      // Mix with pink noise characteristics for better psychoacoustic balance
+      const pinkComponent = white * 0.7
+      samples[i] = pinkComponent * 0.6
+    }
+    
+    // Apply additional filtering to approximate grey noise characteristics
+    // This is a simplified version - true grey noise requires complex filtering
+    const filtered = new Float32Array(length)
+    let state1 = 0, state2 = 0
+    
+    for (let i = 0; i < length; i++) {
+      // Multi-band filtering approximation
+      state1 = state1 * 0.99 + samples[i] * 0.01
+      state2 = state2 * 0.95 + samples[i] * 0.05
+      filtered[i] = (state1 * 0.4 + state2 * 0.3 + samples[i] * 0.3) * 1.2
+    }
+    
+    return filtered
+  }, [])
+
+  // Orange Noise: Between pink and brown (1/f^1.5 spectrum)
+  const generateOrangeNoise = useCallback((length, state = null) => {
+    const samples = new Float32Array(length)
+    let lastSample = state?.lastSample ?? 0
+    let filterState = state?.filterState ?? 0
+    
+    for (let i = 0; i < length; i++) {
+      const white = (Math.random() * 2 - 1) * 0.5
+      
+      // Partial integration (between pink and brown)
+      // This creates a 1/f^1.5 spectrum
+      filterState = filterState * 0.992 + white * 0.008
+      lastSample = (lastSample + filterState * 0.015) * 0.995
+      
+      samples[i] = lastSample * 2.8
+    }
+    
+    return { samples, state: { lastSample, filterState } }
   }, [])
 
   // Normalize samples to prevent clipping
@@ -235,6 +415,21 @@ function App() {
             state = result.state
             break
           }
+          case 'violet': {
+            const result = generateVioletNoise(chunkLength, state)
+            chunkSamples = result.samples
+            state = result.state
+            break
+          }
+          case 'grey':
+            chunkSamples = generateGreyNoise(chunkLength)
+            break
+          case 'orange': {
+            const result = generateOrangeNoise(chunkLength, state)
+            chunkSamples = result.samples
+            state = result.state
+            break
+          }
           default:
             throw new Error('Unknown noise type')
         }
@@ -262,7 +457,7 @@ function App() {
     } finally {
       setIsGenerating(false)
     }
-  }, [duration, noiseType, generateWhiteNoise, generatePinkNoise, generateBrownNoise, generateBlueNoise, normalizeSamples, createWavFile, downloadFile, showStatus])
+   }, [duration, noiseType, generateWhiteNoise, generatePinkNoise, generateBrownNoise, generateBlueNoise, generateVioletNoise, generateGreyNoise, generateOrangeNoise, normalizeSamples, createWavFile, downloadFile, showStatus])
 
   // Calculate slider percentage for visual feedback
   const sliderPercentage = useMemo(() => {
@@ -281,49 +476,124 @@ function App() {
         <div className="noise-selection">
           <h2>Select Noise Type</h2>
           <div className="checkbox-group">
-            <label className={`checkbox-label ${noiseType === 'brown' ? 'checked' : ''}`}>
+            <label 
+              className={`checkbox-label ${noiseType === 'brown' ? 'checked' : ''}`}
+              onMouseEnter={playHoverSound}
+            >
               <input 
                 type="radio" 
                 name="noiseType" 
                 value="brown"
                 checked={noiseType === 'brown'}
-                onChange={(e) => setNoiseType(e.target.value)}
+                onChange={(e) => {
+                  setNoiseType(e.target.value)
+                  playSelectSound()
+                }}
               />
               <span className="checkbox-custom"></span>
               <span className="checkbox-text">Brown Noise</span>
             </label>
-            <label className={`checkbox-label ${noiseType === 'white' ? 'checked' : ''}`}>
+            <label 
+              className={`checkbox-label ${noiseType === 'white' ? 'checked' : ''}`}
+              onMouseEnter={playHoverSound}
+            >
               <input 
                 type="radio" 
                 name="noiseType" 
                 value="white"
                 checked={noiseType === 'white'}
-                onChange={(e) => setNoiseType(e.target.value)}
+                onChange={(e) => {
+                  setNoiseType(e.target.value)
+                  playSelectSound()
+                }}
               />
               <span className="checkbox-custom"></span>
               <span className="checkbox-text">White Noise</span>
             </label>
-            <label className={`checkbox-label ${noiseType === 'pink' ? 'checked' : ''}`}>
+            <label 
+              className={`checkbox-label ${noiseType === 'pink' ? 'checked' : ''}`}
+              onMouseEnter={playHoverSound}
+            >
               <input 
                 type="radio" 
                 name="noiseType" 
                 value="pink"
                 checked={noiseType === 'pink'}
-                onChange={(e) => setNoiseType(e.target.value)}
+                onChange={(e) => {
+                  setNoiseType(e.target.value)
+                  playSelectSound()
+                }}
               />
               <span className="checkbox-custom"></span>
               <span className="checkbox-text">Pink Noise</span>
             </label>
-            <label className={`checkbox-label ${noiseType === 'blue' ? 'checked' : ''}`}>
+            <label 
+              className={`checkbox-label ${noiseType === 'blue' ? 'checked' : ''}`}
+              onMouseEnter={playHoverSound}
+            >
               <input 
                 type="radio" 
                 name="noiseType" 
                 value="blue"
                 checked={noiseType === 'blue'}
-                onChange={(e) => setNoiseType(e.target.value)}
+                onChange={(e) => {
+                  setNoiseType(e.target.value)
+                  playSelectSound()
+                }}
               />
               <span className="checkbox-custom"></span>
               <span className="checkbox-text">Blue Noise</span>
+            </label>
+            <label 
+              className={`checkbox-label ${noiseType === 'violet' ? 'checked' : ''}`}
+              onMouseEnter={playHoverSound}
+            >
+              <input 
+                type="radio" 
+                name="noiseType" 
+                value="violet"
+                checked={noiseType === 'violet'}
+                onChange={(e) => {
+                  setNoiseType(e.target.value)
+                  playSelectSound()
+                }}
+              />
+              <span className="checkbox-custom"></span>
+              <span className="checkbox-text">💜 Violet Noise</span>
+            </label>
+            <label 
+              className={`checkbox-label ${noiseType === 'grey' ? 'checked' : ''}`}
+              onMouseEnter={playHoverSound}
+            >
+              <input 
+                type="radio" 
+                name="noiseType" 
+                value="grey"
+                checked={noiseType === 'grey'}
+                onChange={(e) => {
+                  setNoiseType(e.target.value)
+                  playSelectSound()
+                }}
+              />
+              <span className="checkbox-custom"></span>
+              <span className="checkbox-text">⚪ Grey Noise</span>
+            </label>
+            <label 
+              className={`checkbox-label ${noiseType === 'orange' ? 'checked' : ''}`}
+              onMouseEnter={playHoverSound}
+            >
+              <input 
+                type="radio" 
+                name="noiseType" 
+                value="orange"
+                checked={noiseType === 'orange'}
+                onChange={(e) => {
+                  setNoiseType(e.target.value)
+                  playSelectSound()
+                }}
+              />
+              <span className="checkbox-custom"></span>
+              <span className="checkbox-text">🧡 Orange Noise</span>
             </label>
           </div>
         </div>
@@ -356,6 +626,7 @@ function App() {
                 type="button"
                 className="preset-btn"
                 onClick={() => setDuration(5)}
+                onMouseEnter={playHoverSound}
                 disabled={isGenerating}
               >
                 5 min
@@ -364,6 +635,7 @@ function App() {
                 type="button"
                 className="preset-btn"
                 onClick={() => setDuration(30)}
+                onMouseEnter={playHoverSound}
                 disabled={isGenerating}
               >
                 30 min
@@ -372,6 +644,7 @@ function App() {
                 type="button"
                 className="preset-btn"
                 onClick={() => setDuration(60)}
+                onMouseEnter={playHoverSound}
                 disabled={isGenerating}
               >
                 1 hour
@@ -380,6 +653,7 @@ function App() {
                 type="button"
                 className="preset-btn"
                 onClick={() => setDuration(120)}
+                onMouseEnter={playHoverSound}
                 disabled={isGenerating}
               >
                 2 hours
@@ -397,6 +671,16 @@ function App() {
           <span className="btn-text">{isGenerating ? 'Generating...' : 'Generate'}</span>
           {isGenerating && <span className="btn-loader"></span>}
         </button>
+
+        <a
+          href="https://buymeacoffee.com/nickzaleski"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="donate-btn"
+          onMouseEnter={playHoverSound}
+        >
+          ☕ Buy Me a Coffee
+        </a>
 
         {status.message && (
           <div className={`status-message show ${status.type}`}>
