@@ -468,14 +468,16 @@ function App() {
   const formattedDuration = useMemo(() => formatDuration(duration), [duration])
 
   return (
-    <div className="container">
-      <div className="card">
-        <h1>🎵 Noise Generator</h1>
-        <p className="subtitle">Generate high-quality noise audio files</p>
+    <main className="container" role="main" aria-label="Noise Generator Application">
+      <article className="card">
+        <header>
+          <h1>🎵 Noise Generator</h1>
+          <p className="subtitle">Generate high-quality noise audio files for free. Create white noise, pink noise, brown noise, blue noise, violet noise, grey noise, and orange noise. Download WAV files up to 2 hours in length.</p>
+        </header>
         
-        <div className="noise-selection">
-          <h2>Select Noise Type</h2>
-          <div className="checkbox-group">
+        <section className="noise-selection" aria-labelledby="noise-type-heading">
+          <h2 id="noise-type-heading">Select Noise Type</h2>
+          <div className="checkbox-group" role="radiogroup" aria-label="Noise type selection">
             <label 
               className={`checkbox-label ${noiseType === 'brown' ? 'checked' : ''}`}
               onMouseEnter={playHoverSound}
@@ -489,8 +491,9 @@ function App() {
                   setNoiseType(e.target.value)
                   playSelectSound()
                 }}
+                aria-label="Brown noise - Low-frequency emphasis, deep rumbling sound"
               />
-              <span className="checkbox-custom"></span>
+              <span className="checkbox-custom" aria-hidden="true"></span>
               <span className="checkbox-text">Brown Noise</span>
             </label>
             <label 
@@ -506,8 +509,9 @@ function App() {
                   setNoiseType(e.target.value)
                   playSelectSound()
                 }}
+                aria-label="White noise - Equal energy across all frequencies, classic static sound"
               />
-              <span className="checkbox-custom"></span>
+              <span className="checkbox-custom" aria-hidden="true"></span>
               <span className="checkbox-text">White Noise</span>
             </label>
             <label 
@@ -523,8 +527,9 @@ function App() {
                   setNoiseType(e.target.value)
                   playSelectSound()
                 }}
+                aria-label="Pink noise - Equal energy per octave, balanced frequency spectrum"
               />
-              <span className="checkbox-custom"></span>
+              <span className="checkbox-custom" aria-hidden="true"></span>
               <span className="checkbox-text">Pink Noise</span>
             </label>
             <label 
@@ -540,8 +545,9 @@ function App() {
                   setNoiseType(e.target.value)
                   playSelectSound()
                 }}
+                aria-label="Blue noise - High-frequency emphasis, crisp and bright sound"
               />
-              <span className="checkbox-custom"></span>
+              <span className="checkbox-custom" aria-hidden="true"></span>
               <span className="checkbox-text">Blue Noise</span>
             </label>
             <label 
@@ -557,8 +563,9 @@ function App() {
                   setNoiseType(e.target.value)
                   playSelectSound()
                 }}
+                aria-label="Violet noise - Very high-frequency emphasis, sharp and piercing sound"
               />
-              <span className="checkbox-custom"></span>
+              <span className="checkbox-custom" aria-hidden="true"></span>
               <span className="checkbox-text">💜 Violet Noise</span>
             </label>
             <label 
@@ -574,8 +581,9 @@ function App() {
                   setNoiseType(e.target.value)
                   playSelectSound()
                 }}
+                aria-label="Grey noise - Psychoacoustically equal loudness across frequencies"
               />
-              <span className="checkbox-custom"></span>
+              <span className="checkbox-custom" aria-hidden="true"></span>
               <span className="checkbox-text">⚪ Grey Noise</span>
             </label>
             <label 
@@ -591,17 +599,19 @@ function App() {
                   setNoiseType(e.target.value)
                   playSelectSound()
                 }}
+                aria-label="Orange noise - Between pink and brown noise, balanced low-frequency emphasis"
               />
-              <span className="checkbox-custom"></span>
+              <span className="checkbox-custom" aria-hidden="true"></span>
               <span className="checkbox-text">🧡 Orange Noise</span>
             </label>
           </div>
-        </div>
+        </section>
 
-        <div className="duration-selection">
-          <h2>Duration</h2>
+        <section className="duration-selection" aria-labelledby="duration-heading">
+          <h2 id="duration-heading">Duration</h2>
           <div className="slider-container">
             <div className="slider-wrapper">
+              <label htmlFor="durationSlider" className="sr-only">Select duration in minutes from {MIN_DURATION_MINUTES} to {MAX_DURATION_MINUTES}</label>
               <input 
                 type="range" 
                 id="durationSlider" 
@@ -611,6 +621,10 @@ function App() {
                 value={duration} 
                 step="1"
                 onChange={handleDurationChange}
+                aria-label={`Duration: ${formattedDuration}`}
+                aria-valuemin={MIN_DURATION_MINUTES}
+                aria-valuemax={MAX_DURATION_MINUTES}
+                aria-valuenow={duration}
                 style={{
                   background: `linear-gradient(to right, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.6) ${sliderPercentage}%, rgba(255, 255, 255, 0.1) ${sliderPercentage}%, rgba(255, 255, 255, 0.1) 100%)`
                 }}
@@ -660,16 +674,17 @@ function App() {
               </button>
             </div>
           </div>
-        </div>
+        </section>
 
         <button 
           id="generateBtn" 
           className="generate-btn"
           onClick={generateNoise}
           disabled={isGenerating}
+          aria-label={isGenerating ? `Generating ${noiseType} noise for ${formattedDuration}` : `Generate ${noiseType} noise file for ${formattedDuration}`}
         >
           <span className="btn-text">{isGenerating ? 'Generating...' : 'Generate'}</span>
-          {isGenerating && <span className="btn-loader"></span>}
+          {isGenerating && <span className="btn-loader" aria-hidden="true"></span>}
         </button>
 
         <a
@@ -678,17 +693,23 @@ function App() {
           rel="noopener noreferrer"
           className="donate-btn"
           onMouseEnter={playHoverSound}
+          aria-label="Support the creator on Buy Me a Coffee"
         >
           ☕ Buy Me a Coffee
         </a>
 
         {status.message && (
-          <div className={`status-message show ${status.type}`}>
+          <div 
+            className={`status-message show ${status.type}`}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {status.message}
           </div>
         )}
-      </div>
-    </div>
+      </article>
+    </main>
   )
 }
 

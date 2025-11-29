@@ -1,5 +1,9 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://yourdomain.com/sitemap.xml
+# Sitemap
+Sitemap: https://noisegenerator.vercel.app/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
 
