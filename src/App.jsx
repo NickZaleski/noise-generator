@@ -199,15 +199,28 @@ function App() {
   }, [])
 
   // Brown Noise: More low-frequency emphasis (1/f² spectrum)
+  // Also known as Brownian noise or red noise - deep, rumbling sound
   const generateBrownNoise = useCallback((length, state = null) => {
     const samples = new Float32Array(length)
     let lastSample = state?.lastSample ?? 0
     
+    // Leaky integrator coefficient - controls how much low frequency emphasis
+    // Higher value = more bass, more "rumble"
+    const leak = 0.997 // Very slight leak to prevent DC drift
+    const gain = 0.05  // Integration gain - higher = more bass response
+    
     for (let i = 0; i < length; i++) {
-      const white = (Math.random() * 2 - 1) * 0.5
-      // Integrate white noise to create brown noise
-      lastSample = (lastSample + white * 0.02) * 0.99
-      samples[i] = lastSample * 3.5 // Scale appropriately
+      const white = (Math.random() * 2 - 1)
+      // Leaky integration of white noise creates brown noise
+      // This is the classic Brownian motion / random walk algorithm
+      lastSample = leak * lastSample + gain * white
+      
+      // Soft clipping to prevent harsh distortion while keeping warmth
+      let sample = lastSample
+      if (sample > 1) sample = 1 - Math.exp(1 - sample)
+      else if (sample < -1) sample = -1 + Math.exp(1 + sample)
+      
+      samples[i] = sample * 0.7 // Output gain
     }
     
     return { samples, state: { lastSample } }
